@@ -5,6 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <pthread.h>
 #include <math.h>
 #include <time.h>
@@ -22,7 +23,7 @@
 long int N, ER;
 
 double *row_sums, *col_sums, all_sum;
-double u = 2.2e-16;
+double u = 1.1e-16;
 double lambda, mu, tau;  // thresholds for distinguishing roundoff between fault
 gsl_matrix *target;
 
@@ -269,12 +270,9 @@ void test_ft_dgemm()
     pthread_create(&tid, NULL, noise_thread, NULL);
 
 
-    /*s = floor(MET * 1.0e8 /N/N);*/
-    s = floor(N/2./ER);
-    s = (s < 100) ? 100 : s;
-    /*printf("%d\n", s);*/
+    s = floor(N/ER);
     t0 = clock();
-    ft_dgemm(A, B, C, 100);
+    ft_dgemm(A, B, C, s);
     t1 = clock();
     printf("ft_dgemm: %.3fGFLOPS %.3fs\n", 
             2* pow((N/1000.), 3) * CLOCKS_PER_SEC / (t1-t0), (t1-t0)/CLOCKS_PER_SEC);
@@ -307,6 +305,11 @@ void test_ft_dgemm()
 }
 int main(int argc, char *argv[])
 {
+    if (argc < 3){ 
+        printf("Usage: %s matrix_size errors\n", argv[0]);
+        exit(1);
+    }
+
     N = atoi(argv[1]);
     ER = atoi(argv[2]);
     test_ft_dgemm();
