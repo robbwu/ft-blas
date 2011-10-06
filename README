@@ -1,0 +1,8 @@
+This software is a prototype implementation of the on-line fault tolerant
+matrix multiplication(FTGEMM) described in the paper
+
+Fault Tolerant Matrix-Matrix Multiplication: Correcting Soft Errors On-Line
+(under review)
+
+
+
