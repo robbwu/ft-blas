@@ -15,3 +15,12 @@ To test ft_dgemm:
     ./test/dgemm_test matrix_size error_rate
 
 
+
+
+CHANGELOG:
+
+TODOs:
+- time and probably optimize verify_checksum subroutine by blocking
+- implement BLAS compatitble interface
+- add automated empirical test of block size
+- adjust noise threads parameters, define exactly what FR means. 

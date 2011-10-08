@@ -141,5 +141,6 @@ int main(int argc, char *argv[])
 
     N = atoi(argv[1]);
     ER = atoi(argv[2]);
-    test_ft_dgemm();
+    /*test_ft_dgemm();*/
+    find_opti_bsize();
 }

@@ -1,6 +1,8 @@
 
 CC=gcc
 
+# include directory
+INC=-I../include
 OPTS=-O2
 # fast BLAS library
 BLASLIB=/usr/lib/atlas/libblas.a
