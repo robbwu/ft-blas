@@ -6,21 +6,18 @@ Fault Tolerant Matrix-Matrix Multiplication: Correcting Soft Errors On-Line
 
 This project is in its very early stage; it's only for testing ideas now.
 
-Before compiling you should modify make.inc properly.
+Before compiling you should modify CMakeLists.txt properly.  See the instructions
+in CMakeLists.txt.  You should have GNU Scientifc Library, a fast BLAS
+implementation and pthread for dgemm_test.
 
 To compile:
+    cmake .
     make
 
 To test ft_dgemm:
-    ./test/dgemm_test matrix_size error_rate
+    ./test/dgemm_test matrix_size errors_per_op check_numbers
 
 
-
-
-CHANGELOG:
 
 TODOs:
-- time and probably optimize verify_checksum subroutine by blocking
 - implement BLAS compatitble interface
-- add automated empirical test of block size
-- adjust noise threads parameters, define exactly what FR means. 

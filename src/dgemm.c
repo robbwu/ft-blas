@@ -10,6 +10,7 @@
 #include <gsl/gsl_blas.h>
 #include <gsl/gsl_matrix.h>
 #include <gsl/gsl_vector.h>
+#include "mmbs.h"
 
 #ifndef GSL_RANGE_CHECK_OFF
 #define GSL_RANGE_CHECK_OFF
@@ -96,6 +97,7 @@ int verify_checksum(gsl_matrix *C)
 
     // calculate row & col sums.
 
+    /*printf("checked!\n");*/
     memset((void*)row_sums, 0, sizeof(double)*(m-1));
     memset((void*)col_sums, 0, sizeof(double)*(n-1));
 
@@ -139,7 +141,8 @@ int verify_checksum(gsl_matrix *C)
         return -2;
 }
 
-int ft_dgemm(gsl_matrix *A, gsl_matrix *B, gsl_matrix *C, int rank)
+int ft_dgemm(gsl_matrix *A, gsl_matrix *B, gsl_matrix *C, int Nchk)
+// Nchk: at least check Nchk times during one multiplication
 {
     int err, trials= 0;
     int i, j, s;
@@ -151,6 +154,7 @@ int ft_dgemm(gsl_matrix *A, gsl_matrix *B, gsl_matrix *C, int rank)
     n = B->size2 - 1;
     k = A->size2;
     mm = m+1; nn = n+1;
+    if(Nchk > k/MMRANK) Nchk = k/MMRANK;
     
     // allocate workspace for verify_checksum
     row_sums = calloc(m, sizeof(double));
@@ -162,29 +166,36 @@ int ft_dgemm(gsl_matrix *A, gsl_matrix *B, gsl_matrix *C, int rank)
 
 
     // build checksum matrices A^c, B^r
-retry:
-    trials++;
+/*retry:*/
+    /*trials++;*/
     build_checksum(A, B, C);
 
-    
-    for (s = 0; s < k/rank * rank; s+=rank) {
-        err = verify_checksum(C);
-        if (err < 0 && trials < 5)
-            goto retry;
-        Av = gsl_matrix_submatrix(A, 0, s, mm, rank);
-        Bv = gsl_matrix_submatrix(B, s, 0, rank, nn);
+    int t=1,tt,ss; 
+    tt = (int)ceil(k/MMRANK);
+    for (s = 0; s < k/MMRANK * MMRANK; s+=MMRANK) {
+        ss = s/MMRANK;
+        /*printf("ss=%d tt=%d t=%d\n", ss, tt, t);*/
+        if(ss == tt*t/Nchk){
+            /*printf("yahoo!\n");*/
+            err = verify_checksum(C);
+            t++;
+        }
+        /*if (err < 0 && trials < 5)*/
+            /*goto retry;*/
+        Av = gsl_matrix_submatrix(A, 0, s, mm, MMRANK);
+        Bv = gsl_matrix_submatrix(B, s, 0, MMRANK, nn);
         gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &Av.matrix, &Bv.matrix, 1.0, C);
     }
 
     if (s < k) {
-        err = verify_checksum(C);
-        /*printf("err: %d\n", err); */
-        if (err < 0 && trials < 5)
-            goto retry;
         Av = gsl_matrix_submatrix(A, 0, s, mm, k-s);
         Bv = gsl_matrix_submatrix(B, s, 0, k-s , nn);
         gsl_blas_dgemm(CblasNoTrans, CblasNoTrans, 1.0, &Av.matrix, &Bv.matrix, 1.0, C);
     }
+    err = verify_checksum(C);
+    /*if (err < 0 && trials < 5)*/
+        /*goto retry;*/
+
     free(row_sums); free(col_sums);
     return trials;
 
